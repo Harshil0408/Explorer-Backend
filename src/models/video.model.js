@@ -6,9 +6,17 @@ const videoSchema = new Schema({
         type: String,
         required: [true, "Video file is required"],
     },
+    videoPublicId: {
+        type: String,
+        required: [true, "Video public ID is required"],
+    },
     thumbnail: {
         type: String,
         required: [true, "Thumbnail is required"],
+    },
+    thumbnailPublicId: {
+        type: String,
+        required: [true, "Thumbnail public ID is required"],
     },
     duration: {
         type: String,
