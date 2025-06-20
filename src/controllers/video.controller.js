@@ -8,6 +8,10 @@ const publishVideo = asyncHandler(async (req, res) => {
     const { title, description } = req.body
 })
 
+const getVideoById = asyncHandler(async (req, res) => {
+    const { videoId } = req.params
+})
+
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
 })
@@ -23,6 +27,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
 export {
     getAllVideos,
     publishVideo,
+    getVideoById,
     updateVideo,
     deleteVideo,
     togglePublishStatus
