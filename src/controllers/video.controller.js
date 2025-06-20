@@ -60,8 +60,6 @@ const publishVideo = asyncHandler(async (req, res) => {
     const videoFile = req.files?.videoFile?.[0]?.path
     const thumbnail = req.files?.thumbnail?.[0]?.path
 
-    console.log({ title, description, videoFile, thumbnail })
-
     if (!title || !description || !videoFile || !thumbnail) {
         throw new ApiError(400, "All fields are required")
     }
@@ -122,7 +120,6 @@ const updateVideo = asyncHandler(async (req, res) => {
 
     if (videoFile) {
         try {
-            console.log("hello")
             const newVideoUpload = await uploadOnCloudinary(videoFile)
 
             if (video.videoPublicId) {
