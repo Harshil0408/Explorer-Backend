@@ -10,7 +10,7 @@ const videoSchema = new Schema({
         type: String,
         required: [true, "Thumbnail is required"],
     },
-    duartion: {
+    duration: {
         type: String,
         required: [true, "Duration is required"],
     },
