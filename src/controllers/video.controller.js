@@ -3,6 +3,7 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 import { deleteClodudinaryFiles, uploadOnCloudinary } from '../utils/cloudinary.js'
 import { Video } from '../models/video.model.js'
 import { APiResponse } from '../utils/apiResponse.js'
+import { VideoView } from '../models/videoview.model.js'
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const {
@@ -93,11 +94,18 @@ const publishVideo = asyncHandler(async (req, res) => {
 
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+    const userId = req.user._id
 
     const result = await Video.findById(videoId)
 
     if (!result) {
         throw new ApiError(404, "Video not found")
+    }
+
+    const alreadyViewed = await VideoView.findOne({ user: userId, video: videoId })
+    if (!alreadyViewed) {
+        await Video.findByIdAndUpdate(videoId, { $inc: { views: 1 } })
+        await VideoView.create({ user: userId, video: videoId })
     }
 
     return res.status(200).json(

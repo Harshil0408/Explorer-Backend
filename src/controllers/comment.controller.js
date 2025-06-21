@@ -1,6 +1,6 @@
-import { Comment } from '../models/comment.model'
-import { asyncHandler } from '../utils/asyncHandler'
-import { Video } from '../models/video.model'
+import { Comment } from '../models/comment.model.js'
+import { asyncHandler } from '../utils/asyncHandler.js'
+import { Video } from '../models/video.model.js'
 import { ApiError } from '../utils/ApiError.js'
 import { APiResponse } from '../utils/ApiResponse.js'
 
