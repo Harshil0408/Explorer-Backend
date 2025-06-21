@@ -4,6 +4,8 @@ import { deleteClodudinaryFiles, uploadOnCloudinary } from '../utils/cloudinary.
 import { Video } from '../models/video.model.js'
 import { APiResponse } from '../utils/apiResponse.js'
 import { VideoView } from '../models/videoview.model.js'
+import { User } from '../models/user.model.js'
+import mongoose from 'mongoose'
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const {
@@ -91,28 +93,30 @@ const publishVideo = asyncHandler(async (req, res) => {
     )
 
 })
-
 const getVideoById = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
-    const userId = req.user._id
+    const { videoId } = req.params;
+    const userId = req.user._id;
 
-    const result = await Video.findById(videoId)
+    const result = await Video.findById(videoId);
+    if (!result) throw new ApiError(404, "Video not found");
 
-    if (!result) {
-        throw new ApiError(404, "Video not found")
-    }
+    const alreadyViewed = await VideoView.findOne({ user: userId, video: videoId });
 
-    const alreadyViewed = await VideoView.findOne({ user: userId, video: videoId })
+    // If this is the user's first view, track it and increment
     if (!alreadyViewed) {
-        await Video.findByIdAndUpdate(videoId, { $inc: { views: 1 } })
-        await VideoView.create({ user: userId, video: videoId })
+        await Video.findByIdAndUpdate(videoId, { $inc: { views: 1 } });
+        await VideoView.create({ user: userId, video: videoId });
     }
+
+    const videoObjectId = new mongoose.Types.ObjectId(videoId);
+    await User.findByIdAndUpdate(userId, {
+        $addToSet: { watchHistory: videoObjectId }
+    });
 
     return res.status(200).json(
         new APiResponse(200, result, "Video fetched successfully")
-    )
-
-})
+    );
+});
 
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
