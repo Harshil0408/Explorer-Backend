@@ -5,7 +5,6 @@ class APiResponse {
         this.message = message;
         this.success = success;
 
-        // Capture the stack trace if available
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, this.constructor);
         } else {

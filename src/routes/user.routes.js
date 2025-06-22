@@ -76,7 +76,6 @@ router
     )
 
 
-//Secure routes
 router
     .route("/logout")
     .post(

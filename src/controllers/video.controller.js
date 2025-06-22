@@ -102,7 +102,6 @@ const getVideoById = asyncHandler(async (req, res) => {
 
     const alreadyViewed = await VideoView.findOne({ user: userId, video: videoId });
 
-    // If this is the user's first view, track it and increment
     if (!alreadyViewed) {
         await Video.findByIdAndUpdate(videoId, { $inc: { views: 1 } });
         await VideoView.create({ user: userId, video: videoId });
