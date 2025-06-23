@@ -1,10 +1,10 @@
-import { ApiError } from '../utils/apiError.js'
-import { asyncHandler } from '../utils/asyncHandler.js'
-import { APiResponse } from '../utils/apiResponse.js'
-import { Like } from '../models/like.model.js'
 import mongoose from 'mongoose'
-import { Comment } from '../models/comment.model.js'
+import { Like } from '../models/like.model.js'
+import { ApiError } from '../utils/apiError.js'
 import { Tweet } from '../models/tweet.model.js'
+import { APiResponse } from '../utils/apiResponse.js'
+import { Comment } from '../models/comment.model.js'
+import { asyncHandler } from '../utils/asyncHandler.js'
 
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
@@ -62,14 +62,14 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid TweetId")
     }
 
-    const tweetExists = await Tweet.findOne({ tweet: tweetId, likedBy: userId })
+    const tweetExists = await Like.findOne({ tweet: tweetId, likedBy: userId })
 
     if (tweetExists) {
         await tweetExists.deleteOne()
         return res.status(200).json(new APiResponse(200, null, "Tweet Unliked"))
     }
 
-    await Tweet.create({ tweet: tweetId, likedBy: userId })
+    await Like.create({ tweet: tweetId, likedBy: userId })
 
     return res.status(200).json(new APiResponse(200, null, "Tweet Liked"))
 

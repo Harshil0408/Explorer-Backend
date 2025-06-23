@@ -425,3 +425,108 @@ export const getWatchHistory = asyncHandler(async (req, res) => {
 
 })
 
+export const deleteAccount = asyncHandler(async (req, res) => {
+    const userId = req.user._id
+
+    await User.findByIdAndDelete(userId)
+
+    return res.status(200).json(
+        new APiResponse(200, null, "User account deleted successfully!")
+    )
+
+})
+
+export const blockUser = asyncHandler(async (req, res) => {
+    const { userIdToBlock } = req.body
+    const user = await User.findById(req.user._id)
+
+    if (!user.blockedUser.includes(userIdToBlock)) {
+        user.blockedUser.push(userIdToBlock)
+        await user.save()
+    }
+
+    return res.status(200).json(200, null, "User blocked successfully!")
+
+})
+
+export const unblockUser = asyncHandler(async (req, res) => {
+    const { userIdToUnblock } = req.body
+    const user = await User.findByIdAndDelete(req.user._id)
+
+    user.blockedUser = user.blockUser.filter(
+        id => id.toString() !== userIdToUnblock
+    )
+    await user.save()
+
+    return res.status(200).json(
+        new APiResponse(200, null, "User unblocked successfully!")
+    )
+
+})
+
+export const getAllUsers = asyncHandler(async (req, res) => {
+    const users = await User.find().select("-password -refreshToken");
+    return res.status(200).json(
+        new APiResponse(200, users, "All users fetched successfully")
+    );
+});
+
+
+export const getSuggestedChannels = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id).select("blockedUsers")
+
+    const suggestedChannels = await User.find({
+        _id: {
+            $ne: req.user._id,
+            $nin: user.blockedUser
+        }
+    })
+        .select("fullname username avatar coverImage")
+        .limit(10)
+
+    return res.status(200).json(
+        new APiResponse(200, suggestedChannels, "Suggested channels fetched successfully")
+    );
+})
+
+export const updateUserName = asyncHandler(async (req, res) => {
+    const { newUsername } = req.body
+
+    if (!newUsername) {
+        throw new ApiError(400, "New username is required")
+    }
+
+    const exists = await User.findById({ username: newUsername.toLowerCase() })
+
+    if (exists) {
+        throw new ApiError(404, "username is already taken")
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        { username: newUsername.toLowerCase() },
+        { new: true }
+    )
+
+    return res.status(200).json(
+        new APiResponse(200, user, "Username updated successfully")
+    )
+})
+
+export const updateProfileInfo = asyncHandler(async (req, res) => {
+    const { bio, website, twitter } = req.body
+
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        { $set: { bio, website, twitter } },
+        { new: true }
+    ).select("-password -refreshToken")
+
+    return res.status(200).json(
+        new APiResponse(200, user, "Profile info updated successfully")
+    )
+
+})
+
+
+

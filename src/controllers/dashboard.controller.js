@@ -1,11 +1,11 @@
 import mongoose from 'mongoose'
-import { Video } from '../models/video.model'
-import { asyncHandler } from '../utils/asyncHandler'
 import { Like } from '../models/like.model'
-import { Comment } from '../models/comment.model'
-import { Subscription } from '../models/subscription.model'
-import { APiResponse } from '../utils/ApiResponse'
 import { ApiError } from '../utils/ApiError'
+import { Video } from '../models/video.model'
+import { Comment } from '../models/comment.model'
+import { APiResponse } from '../utils/ApiResponse'
+import { asyncHandler } from '../utils/asyncHandler'
+import { Subscription } from '../models/subscription.model'
 
 const getChannelStats = asyncHandler(async (req, res) => {
     const userId = req.user._id
@@ -48,14 +48,57 @@ const getChannelStats = asyncHandler(async (req, res) => {
 
 const getChannelVideos = asyncHandler(async (req, res) => {
     const { channelId } = req.params
+    const { page = 1, limit = 10, sortBy = "createdAt", order = "asc" } = req.query
 
     if (!channelId) {
         throw new ApiError(400, "ChannelId is not provided")
     }
 
-    const videos = await Video.find({ owner: channelId })
-        .sort({ createdAt: -1 })
-        .select("title thumbnail views createdAt")
+    const skip = (parseInt(page - 1)) * parseInt(limit)
+
+    const videos = await Video.aggregate([
+        {
+            $match: {
+                owner: new mongoose.Types.ObjectId(channelId)
+            }
+        },
+        {
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "video",
+                as: "likes"
+            }
+        },
+        {
+            $lookup: {
+                from: "comments",
+                localField: "_id",
+                foreignField: "video",
+                as: "comments"
+            }
+        },
+        {
+            $project: {
+                title: 1,
+                thumbnail: 1,
+                views: 1,
+                createdAt: 1,
+                likeCount: { $size: "$likes" },
+                commentCount: { $size: "$comments" }
+            }
+        },
+        {
+            $sort: {
+                [sortBy]: order === 'asc' ? 1 : -1
+            }
+        },
+        {
+            $skip: skip
+        }, {
+            $limit: parseInt(limit)
+        }
+    ])
 
     return res.status(200).json(
         new APiResponse(200, videos, "Channel videos fetched successfully")

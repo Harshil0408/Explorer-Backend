@@ -13,6 +13,10 @@ const videoViewSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    watchedTime: {
+        type: Number,
+        default: 0
+    }
 }, { timestamps: true });
 
 export const VideoView = mongoose.model("VideoView", videoViewSchema);

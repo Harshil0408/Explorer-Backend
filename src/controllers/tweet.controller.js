@@ -1,10 +1,9 @@
-import { asyncHandler } from "../utils/asyncHandler.js"
+import mongoose from "mongoose"
 import { User } from '../models/user.model.js'
 import { ApiError } from '../utils/ApiError.js'
 import { Tweet } from "../models/tweet.model.js"
 import { APiResponse } from '../utils/ApiResponse.js'
-import mongoose from "mongoose"
-import { text } from "express"
+import { asyncHandler } from "../utils/asyncHandler.js"
 
 const createTweet = asyncHandler(async (req, res) => {
     const userId = req.user._id
